@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
     private TextView textLg;
 
     //操作数数组
-    private double[] operArr = new double[10];
+    private float[] operArr = new float[10];
     //操作符数组
     private char[] symbols = new char[10];
     //标志最后一位是小数还是整数，true代表整数
@@ -95,32 +95,45 @@ public class MainActivity extends Activity {
             symbolBtnHandler(v);
         });
         btnEq.setOnClickListener((View v) -> {
-            double result = 0;
+            float result = 0;
             String lgTxt = (String) textLg.getText();
-            if (cont > 1) {
+            //如果最后一个字符不为数字，则打印错误并退出
+            if(lgTxt.length() > 0){
+                char lastC = lgTxt.charAt(lgTxt.length() - 1);
+                if(!Character.isDigit(lastC)){
+                    //复位计算器
+                    resetCalculator();
+                    textSm.setText("Error!");
+                    return;
+                }
+            }else{
+                return ;
+            }
+            if (cont >= 1) {
                 result = operArr[1];
             } else if (cont == 0) {
                 return;
             }
-            for (int i = 0; i < cont; i++) {
-                switch (symbols[i]) {
+            for (int i = 1; i < cont; i++) {
+                switch (symbols[i - 1]) {
                     case '+':
-                        result = result + operArr[i + 2];
+                        result = result + operArr[i + 1];
                         break;
                     case '-':
-                        result = result - operArr[i + 2];
+                        result = result - operArr[i + 1];
                         break;
                     case '*':
-                        result = result * operArr[i + 2];
+                        result = result * operArr[i + 1];
                         break;
                     case '/':
-                        result = result / operArr[i + 2];
+                        result = result / operArr[i + 1];
                         break;
                 }
             }
             //将结果当做操作数存为第一个操作数
             cont = 1;
             operArr[1] = result;
+            symbols[0] = '\0';
             textSm.setText(lgTxt);
             if (isFloat(operArr[cont])) {
                 textLg.setText(result + "");
@@ -130,9 +143,7 @@ public class MainActivity extends Activity {
         });
         //清空
         btnDEL.setOnClickListener((View) -> {
-            textLg.setText("");
-            textSm.setText("");
-            cont = 0;
+            resetCalculator();
         });
         //删除一个字符
         btnC.setOnClickListener((View) -> {
@@ -142,13 +153,27 @@ public class MainActivity extends Activity {
             if (c == '.') {
                 flag = true;
             } else if (Character.isDigit(c)) {
-                String numStr = operArr[cont] + "";
-                operArr[cont] = Double.parseDouble(numStr.substring(0, numStr.length() - 1));
+                String numStr = null;
+                if (isFloat(operArr[cont])) {
+                    numStr = operArr[cont] + "";
+                } else {
+                    numStr = Integer.toString((int) operArr[cont]);
+                }
+                operArr[cont] = Float.parseFloat(numStr.substring(0, numStr.length() - 1));
             } else if (lgTxt.length() == 1) {
                 cont = 0;
             }
             textLg.setText(lgTxt.substring(0, lgTxt.length() - 1));
         });
+    }
+
+    /**
+     * 复位计算器
+     */
+    private void resetCalculator() {
+        textLg.setText("");
+        textSm.setText("");
+        cont = 0;
     }
 
     /**
@@ -194,7 +219,7 @@ public class MainActivity extends Activity {
      * @param num
      * @return
      */
-    private boolean isFloat(double num) {
+    private boolean isFloat(float num) {
         double eps = 1e-15;  // 精度范围
         //转换为整数方便判断
         num = Math.abs(num);
@@ -213,7 +238,7 @@ public class MainActivity extends Activity {
         int num = (int) Integer.parseInt((String) btn.getText());
         //获取大文本框中的字符串
         String lgTxt = (String) textLg.getText();
-        double operNum = 0;
+        float operNum = 0;
         if (lgTxt.length() > 0) {
             char lastC = lgTxt.charAt(lgTxt.length() - 1);
             //如果最后一位不是数字也不是小数点，则肯定是运算符，因此要新增加一个操作数
@@ -230,7 +255,7 @@ public class MainActivity extends Activity {
         }
         //计算操作数，并存入操作数组中
         if (flag) operArr[cont] = operNum * 10 + num;
-        else operArr[cont] = operNum + num * 0.1;
+        else operArr[cont] = (float) (operNum + num * 0.1);
         //显示字符
         if (lgTxt.length() == 1 && 0 == operNum) textLg.setText(lgTxt);
         else textLg.setText(lgTxt + btn.getText());
