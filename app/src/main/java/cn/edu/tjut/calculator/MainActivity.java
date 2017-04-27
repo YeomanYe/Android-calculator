@@ -143,10 +143,6 @@ public class MainActivity extends Activity {
         });
         //清空
         btnDEL.setOnClickListener((View) -> {
-            resetCalculator();
-        });
-        //删除一个字符
-        btnC.setOnClickListener((View) -> {
             String lgTxt = (String) textLg.getText();
             if (lgTxt.length() == 0) return;
             char c = lgTxt.charAt(lgTxt.length() - 1);
@@ -164,6 +160,10 @@ public class MainActivity extends Activity {
                 cont = 0;
             }
             textLg.setText(lgTxt.substring(0, lgTxt.length() - 1));
+        });
+        //删除一个字符
+        btnC.setOnClickListener((View) -> {
+            resetCalculator();
         });
     }
 
